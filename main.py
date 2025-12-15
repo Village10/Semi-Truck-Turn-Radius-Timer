@@ -16,6 +16,7 @@ class TimerApp:
         self.timer_running = False
         self.attempts = 0
         self.best_time = None
+        self.current_time = 0
 
         # Create a label to display the timer
         self.attempts_label = tk.Label(root, text="Attempts: 0", font=("Helvetica", 18), bg='#222222', fg='white')
@@ -49,15 +50,14 @@ class TimerApp:
 
     def stop_timer(self):
         self.timer_running = False
-        current_time = int(round(time.time() * 1000)) - self.start_time
-        if pyautogui.pixel(688,370) == (214, 214, 214) and current_time > 3000:
+        if pyautogui.pixel(688,370) == (214, 214, 214) and self.current_time > 3000:
             self.attempts += 1
             self.attempts_label.config(text=f"Attempts: {self.attempts}")
             self.timer_label.config(fg="green")
             if self.best_time:
-                self.best_time = min(self.best_time, current_time)
+                self.best_time = min(self.best_time, self.current_time)
             else:
-                self.best_time = current_time
+                self.best_time = self.current_time
             seconds = math.floor(self.best_time / 1000)
             ms = self.best_time % 1000
             self.best_label.config(text=f"Best: {seconds}:{ms:03}")
@@ -66,9 +66,9 @@ class TimerApp:
 
     def update_timer(self):
         if self.timer_running:
-            current_time = int(round(time.time() * 1000)) - self.start_time
-            seconds = math.floor(current_time / 1000)
-            ms = current_time % 1000
+            self.current_time = int(round(time.time() * 1000)) - self.start_time
+            seconds = math.floor(self.current_time / 1000)
+            ms = self.current_time % 1000
             time_str = f"{seconds}:{ms:03}"
             self.timer_label.config(text=time_str)
             self.root.after(1, self.update_timer)
