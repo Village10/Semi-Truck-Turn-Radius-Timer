@@ -4,6 +4,7 @@ import math
 from pynput import keyboard
 import pyautogui
 import threading
+import pickle
 
 class TimerApp:
     def __init__(self, root):
@@ -15,12 +16,21 @@ class TimerApp:
         self.start_time = None
         self.timer_running = False
         self.attempts = 0
-        self.best_time = None
         self.current_time = 0
+
+        # Load Saved Time
+        try:
+            with open('savefile.pkl', 'rb') as file:
+                self.best_time = pickle.load(file)
+                seconds = math.floor(self.best_time / 1000)
+                ms = self.best_time % 1000
+                self.best_time = f"{seconds}:{ms:03}"
+        except:
+            self.best_time = "N/A"
 
         # Create a label to display the timer
         self.attempts_label = tk.Label(root, text="Attempts: 0", font=("Helvetica", 18), bg='#222222', fg='white')
-        self.best_label = tk.Label(root, text="Best: N/A", font=("Helvetica", 18), bg='#222222', fg='white')
+        self.best_label = tk.Label(root, text="Best: " + str(self.best_time), font=("Helvetica", 18), bg='#222222', fg='white')
         self.timer_label = tk.Label(root, text="00:000", font=("Helvetica", 48), bg='#222222', fg='white')
         self.attempts_label.pack(anchor="w", pady=0)
         self.best_label.pack(anchor="w", pady=0)
@@ -50,12 +60,14 @@ class TimerApp:
 
     def stop_timer(self):
         self.timer_running = False
-        if pyautogui.pixel(688,370) == (214, 214, 214) and self.current_time > 3000:
+        if pyautogui.pixel(688,370) == (214, 214, 214) and self.current_time > 3800:
             self.attempts += 1
             self.attempts_label.config(text=f"Attempts: {self.attempts}")
             self.timer_label.config(fg="green")
             if self.best_time:
                 self.best_time = min(self.best_time, self.current_time)
+                with open('savefile.pkl', 'wb') as file:
+                    pickle.dump(self.best_time, file)
             else:
                 self.best_time = self.current_time
             seconds = math.floor(self.best_time / 1000)
